@@ -1,3 +1,5 @@
+from services.inference.vllm_client import VLLMEmbedder  # noqa: F401
+
 from .base import BaseEmbedding
 from .openai import OpenAIEmbedding
 

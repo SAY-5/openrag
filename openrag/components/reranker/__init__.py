@@ -1,3 +1,6 @@
+from services.inference.reranker_clients import InfinityReranker as InfinityRerankerAdapter  # noqa: F401
+from services.inference.reranker_clients import OpenAIReranker as OpenAIRerankerAdapter  # noqa: F401
+
 from .base import BaseReranker
 
 

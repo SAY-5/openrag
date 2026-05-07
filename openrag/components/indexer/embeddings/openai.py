@@ -1,6 +1,12 @@
+"""Backward-compatibility shim — delegates to services.inference.vllm_client.
+
+All new code should import directly from ``services.inference.vllm_client``.
+"""
+
 import openai
 from langchain_core.documents.base import Document
 from openai import OpenAI
+from services.inference.vllm_client import VLLMEmbedder  # noqa: F401
 from utils.exceptions.embeddings import *
 from utils.logger import get_logger
 
@@ -10,6 +16,8 @@ logger = get_logger()
 
 
 class OpenAIEmbedding(BaseEmbedding):
+    """Legacy OpenAI embedding wrapper. New code should use VLLMEmbedder (via DI)."""
+
     def __init__(self, embeddings_config):
         self.embedding_model = embeddings_config.model_name
         self.base_url = embeddings_config.base_url
@@ -20,16 +28,12 @@ class OpenAIEmbedding(BaseEmbedding):
     @property
     def embedding_dimension(self) -> int:
         try:
-            # Test call to get embedding dimension
             output = self.embed_documents([Document(page_content="test")])
             return len(output[0])
         except Exception:
             raise
 
     def embed_documents(self, texts: list[str | Document]) -> list[list[float]]:
-        """
-        Embed documents using the configured embedder.
-        """
         if isinstance(texts[0], Document):
             texts = [doc.page_content for doc in texts]
 
@@ -69,9 +73,6 @@ class OpenAIEmbedding(BaseEmbedding):
             )
 
     def embed_query(self, text: str) -> list[float]:
-        """
-        Embed a query using the configured embedder.
-        """
         try:
             output = self.embed_documents([Document(page_content=text)])
             return output[0]

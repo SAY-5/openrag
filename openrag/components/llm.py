@@ -1,13 +1,21 @@
+"""Backward-compatibility shim — delegates to services.inference.vllm_client.
+
+All new code should import directly from ``services.inference.vllm_client``.
+"""
+
 import copy
 import json
 
 import httpx
+from services.inference.vllm_client import VLLMClient  # noqa: F401
 from utils.logger import get_logger
 
 logger = get_logger()
 
 
 class LLM:
+    """Legacy LLM wrapper. New code should use VLLMClient (via DI) instead."""
+
     def __init__(self, llm_config, logger=None):
         self.logger = logger
         default_llm_config = llm_config.model_dump()
@@ -21,7 +29,6 @@ class LLM:
         }
 
     def _extract_llm_overrides(self, request: dict):
-        """Extract and apply LLM overrides from metadata.llm_override."""
         metadata = request.get("metadata") or {}
         llm_override = metadata.pop("llm_override", None) or {}
 
@@ -87,7 +94,7 @@ class LLM:
                     logger.error(f"Error while streaming chat completion: {str(e)}")
                     raise
 
-            else:  # Handle non-streaming response
+            else:
                 try:
                     response = await client.post(
                         url=f"{base_url}/chat/completions",
